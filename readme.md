@@ -30,9 +30,13 @@ Available arguments are declared in comments in your shell script. The relevant 
 
 A line's first part contains a short or long name of an arg or just one of these. Afterwards a description and default value can be declared in a kind of key value structure.
 
+You can also use `synopsis` and `examples`. The first one will be displayed in help before the list of arguments and the second one afterwards.
+
 Looking like this for example:
 
 ```shell
+#ap_ synopsis: this is an extremely useful script
+#ap_ examples: script.sh -h, script.sh -s hello
 #ap_ b,bool; desc=boolean value, true or false
 #ap_ v,val; desc=value that can take argument
 #ap_ lbool; desc=boolean value with long arg only

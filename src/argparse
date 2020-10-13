@@ -1,9 +1,10 @@
 #!/bin/bash
 
 IFS=$'\n'
+scriptdir="$(cd "$(dirname "${0}")" && pwd)"
+scriptname="$(basename "${0}")"
+
 _ap_allowed_chars="[a-zA-Z0-9_,\.\s]+"
-_ap_scriptdir="$(cd "$(dirname "${0}")" && pwd)"
-_ap_scriptname="$(basename "${0}")"
 _ap_args=""
 for val in "${@:2}"; do
     _ap_args+="${val};"
@@ -11,6 +12,12 @@ done
 
 function len() {
     echo -n "${1}" | wc -m
+}
+
+function title() {
+    arg="${1}"
+    echo ""
+    echo "$(tr '[:lower:]' '[:upper:]' <<<"${arg:0:1}")${arg:1}"
 }
 
 function get_val() {
@@ -55,9 +62,21 @@ function get_arg_val() {
     fi
 }
 
+function print_help_entry() {
+    arr=()
+    title "${1}"
+    for line in "${_ap_spec[@]}"; do
+        e="$(echo ${line} | grep -Po "(?<=${1}:\s).*")"
+        if ((${#e} > 1)); then
+            echo "   ${e}"
+        fi
+    done
+}
+
 function display_help() {
-    title="$(tr '[:lower:]' '[:upper:]' <<<"${_ap_scriptname:0:1}")${_ap_scriptname:1}"
-    echo -e "\n${title} Help\n"
+    title "${scriptname} Help"
+    print_help_entry "synopsis"
+    title "Args"
     for line in "${_ap_spec[@]}"; do
         s=$(echo "${line}" | grep -Po "^${_ap_allowed_chars}?(?=;)" | sed 's/,/, /g')
         t=$(get_val "desc" "${line}")
@@ -65,9 +84,11 @@ function display_help() {
         if [[ -n "${d}" ]]; then
             d="[default: ${d}]"
         fi
-        printf "   %-15s %s %s\n" "${s}" "${t}" "${d}"
+        if [[ -n "${s}" ]]; then
+            printf "   %-15s %s %s\n" "${s}" "${t}" "${d}"
+        fi
     done
-    echo ""
+    print_help_entry "examples"
     exit 0
 
 }
