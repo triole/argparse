@@ -1,0 +1,106 @@
+#!/bin/bash
+
+IFS=$'\n'
+_ap_allowed_chars="[a-zA-Z0-9_,\.\s]+"
+_ap_scriptdir="$(cd "$(dirname "${0}")" && pwd)"
+_ap_scriptname="$(basename "${0}")"
+_ap_args=""
+for val in "${@:2}"; do
+    _ap_args+="${val};"
+done
+
+function len() {
+    echo -n "${1}" | wc -m
+}
+
+function get_val() {
+    echo "${2}" | grep -Po "(?<=${1}\=)${_ap_allowed_chars}" | xargs
+}
+
+function get_names() {
+    echo "${1}" | grep -Po "^${_ap_allowed_chars}(?=;)" | xargs
+}
+
+function get_long_name() {
+    n=$(get_names "${1}")
+    ln=$(echo "${n}" | grep -Po "[^,]+$")
+    if [[ -n "${ln}" ]]; then
+        echo "${ln}"
+    else
+        echo "${n}"
+    fi
+}
+
+function get_short_name() {
+    n=$(get_names "${1}")
+    sn=$(echo "${n}" | grep -Po "^${_ap_allowed_chars}?(?=,)")
+    if [[ -n "${sn}" ]]; then
+        echo "${sn}"
+    else
+        echo "${n}"
+    fi
+}
+
+function get_arg_val() {
+    bool=$(echo "${1}" | grep -Po "\-(${2}|${3})(?=;)" | grep -Po "[^\-]+$")
+    val=$(echo "${1}" | grep -Po "\-(${2}|${3});${_ap_allowed_chars}" | grep -Po "[^;]+$")
+    if [[ -n "${val}" ]]; then
+        echo "${val}"
+        return
+    elif [[ -n "${bool}" ]]; then
+        echo "true"
+        return
+    else
+        echo ""
+    fi
+}
+
+function display_help() {
+    title="$(tr '[:lower:]' '[:upper:]' <<<"${_ap_scriptname:0:1}")${_ap_scriptname:1}"
+    echo -e "\n${title} Help\n"
+    for line in "${_ap_spec[@]}"; do
+        s=$(echo "${line}" | grep -Po "^${_ap_allowed_chars}?(?=;)" | sed 's/,/, /g')
+        t=$(get_val "desc" "${line}")
+        d=$(get_val "default" "${line}")
+        if [[ -n "${d}" ]]; then
+            d="[default: ${d}]"
+        fi
+        printf "   %-15s %s %s\n" "${s}" "${t}" "${d}"
+    done
+    echo ""
+    exit 0
+
+}
+
+function dump_args() {
+    echo -e "Parsed args ${_ap_args}"
+    echo -e "Result vars"
+    local varname
+    compgen -v | while read -r varname; do
+        printf "\t${varname}=%q\n" "${!varname}" | grep -Po ".*args_.*"
+    done
+    echo ""
+}
+
+function main() {
+    for line in "${_ap_spec[@]}"; do
+        lname=$(get_long_name "${line}")
+        sname=$(get_short_name "${line}")
+        default=$(get_val "default" "${line}")
+        val=$(get_arg_val "${_ap_args}" "${sname}" "${lname}")
+        if [[ ("${val}"=="false" && -n "${default}") ]]; then
+            val="${default}"
+        fi
+        if [[ -n "${lname}" ]]; then
+            declare -g "args_${lname}=${val}"
+        fi
+    done
+}
+
+if [[ "${0}" != *bats-exec-test* ]]; then
+    _ap_spec=($(cat "${0}" | grep -Po "(?<=\#ap_\s).*"))
+    if [[ -n $(echo "${_ap_args}" | grep -Po "\-(h|help)") ]]; then
+        display_help
+    fi
+    main
+fi

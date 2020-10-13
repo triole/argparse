@@ -1,0 +1,17 @@
+version: '2'
+
+vars:
+    CURDIR:
+        sh: pwd
+    TESTDIR:
+        sh: echo "$(pwd)/test"
+    SRCDIR:
+        sh: echo "$(pwd)/src"
+
+tasks:
+    default:
+        - task: test
+
+    test:
+        cmds:
+            - cmd: cd {{.SRCDIR}} && bats argparse_test.bats
