@@ -89,6 +89,7 @@ function display_help() {
         fi
     done
     print_help_entry "examples"
+    echo ""
     exit 0
 
 }
