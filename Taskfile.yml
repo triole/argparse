@@ -14,4 +14,7 @@ tasks:
 
     test:
         cmds:
-            - cmd: cd {{.SRCDIR}} && bats argparse_test.bats
+            - cmd: cd {{.TESTDIR}} && bats argparse_test.bats
+            - cmd: cd {{.TESTDIR}} && ./test1.sh -d
+            - cmd: cd {{.TESTDIR}} && ./test2.sh -b
+            - cmd: cd {{.TESTDIR}} && ./test3.sh -s hello

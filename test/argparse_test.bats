@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-source argparse
+source ../src/argparse
 
 @test "get_names" {
     [[ $(get_long_name "d,debug; desc=enable debug mode") == "debug" ]]
@@ -11,7 +11,6 @@ source argparse
 
     [[ $(get_long_name "debug; desc=enable debug mode") == "debug" ]]
     [[ $(get_short_name "debug; desc=enable debug mode") == "debug" ]]
-
 }
 
 @test "get_val" {
@@ -29,5 +28,4 @@ source argparse
     [[ $(get_arg_val "script.sh;-b;" "c" "char") == "" ]]
     [[ $(get_arg_val "script.sh;-b;" "c") == "" ]]
     [[ $(get_arg_val "script.sh;-b;" "char") == "" ]]
-
 }
