@@ -110,7 +110,7 @@ function main() {
         sname=$(get_short_name "${line}")
         default=$(get_val "default" "${line}")
         val=$(get_arg_val "${_ap_args}" "${sname}" "${lname}")
-        if [[ (-z "${val}" && -n "${default}") ]]; then
+        if [[ (-z "${val}" || "${val}" == "true") && -n "${default}" ]]; then
             val="${default}"
         fi
         if [[ -n "${lname}" ]]; then
