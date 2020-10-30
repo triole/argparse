@@ -3,6 +3,7 @@
 IFS=$'\n'
 scriptdir="$(cd "$(dirname "${0}")" && pwd)"
 scriptname="$(basename "${0}")"
+scripthome="$(echo "${scriptdir}" | grep -Po "/home/[a-zA-Z0-9-_]+")"
 
 _ap_allowed_chars="[a-zA-Z0-9_,\.\s]+"
 _ap_args=""
